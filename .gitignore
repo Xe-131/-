@@ -1,0 +1,7 @@
+# Crazyflie 相关库文件
+crazyflie-clients-python/
+crazyflie-lib-python/
+
+# 虚拟环境
+Crazyflies_env/
+
