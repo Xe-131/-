@@ -2,7 +2,8 @@ import threading
 import queue
 import cv2
 import time
-from vision  import vision_task
+from vision import vision_task
+from fly import fly_init
 
 def voice_task(lock):
     while 1:
@@ -17,6 +18,8 @@ lock = threading.Lock()
 if __name__ == "__main__":
 
     frame_queue = queue.Queue(maxsize=0)
+
+    fly_init()
 
     vision_thread = threading.Thread(target=vision_task, args=(lock, frame_queue))
     voice_thread = threading.Thread(target=voice_task, args=(lock, ))
