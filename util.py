@@ -33,6 +33,8 @@ class FlyCommand(Enum):
     MOVE_LEFT = auto()
     MOVE_FORWARD = auto()
     MOVE_BACKWARD = auto()
+    YOW_LEFT = auto()
+    YOW_RIGHT = auto()
 
 
 
@@ -329,41 +331,10 @@ def get_command(gesture_left, gesture_right):
         command = FlyCommand.MOVE_FORWARD
     elif gesture_left == GestureOneHand.FIVE_BACKWARD and gesture_right == GestureOneHand.FIVE_BACKWARD:
         command = FlyCommand.MOVE_BACKWARD
+    elif gesture_left == GestureOneHand.OK  and gesture_right == GestureOneHand.SEVEN:
+        command = FlyCommand.YOW_LEFT
+    elif gesture_left == GestureOneHand.SEVEN  and gesture_right == GestureOneHand.OK:
+        command = FlyCommand.YOW_RIGHT
+
 
     return command
-        
-
-    
-# """
-# 根据手指的弯曲阈值和识别结果，判断每根手指是否弯曲
-# 返回每根手指是否弯曲的二值字典
-# 每次计算一只手
-# """
-# def finger_is_bend(landmarks_list):
-#     # 计算每根手指向量角度
-#     # 大拇指
-#     first_angle = compute_angle(landmarks_list[3], landmarks_list[2], landmarks_list[4], landmarks_list[3])
-#     print(first_angle)
-#     pass
-    
-
-if __name__ == "__main__":
-
-    # STEP 2: Create an HandLandmarker object.
-    base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
-    options = vision.HandLandmarkerOptions(base_options=base_options,
-                                           num_hands=2)
-    detector = vision.HandLandmarker.create_from_options(options)
-    
-    # STEP 3: Load the input image.
-    image = mp.Image.create_from_file("image.jpg")
-    print(type(image))
-    
-    # STEP 4: Detect hand landmarks from the input image.
-    detection_result = detector.detect(image)
-    
-    # STEP 5: Process the classification result. In this case, visualize it.
-    annotated_image = draw_landmarks_on_image(image.numpy_view(), detection_result)
-    cv2.imshow("main.py", cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
-    cv2.waitKey(0)  # 等待按键输入
-    cv2.destroyAllWindows()  # 关闭所有OpenCV显示窗口
