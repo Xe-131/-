@@ -42,6 +42,7 @@ class FlyCommand(Enum):
 img_width = 720
 img_height = 640 
 
+
 MARGIN = 10  # pixels
 FONT_SIZE = 1
 FONT_THICKNESS = 1
@@ -97,6 +98,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
     # 画出多边形 
     connection_indices = [0, 1, 2, 3, 6, 10, 14, 19, 18, 17, 0]  # Define the indices to connect
+    # 在17 这个点上的多边形部分向下移动，方便识别小拇指弯曲
+    # hand_landmarks[17].y = hand_landmarks[17].y + 0.1
     for i in range(len(connection_indices) - 1):
         start_idx = connection_indices[i]
         end_idx = connection_indices[i + 1]
@@ -109,7 +112,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         start_y = int(start_landmark.y * height)
         end_x = int(end_landmark.x * width)
         end_y = int(end_landmark.y * height)
-
+        
         # Draw a line between the landmarks
         cv2.line(annotated_image, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)       
 
@@ -189,6 +192,8 @@ def compute_angle(A, B, C, D):
 :return: 如果点在多边形内部，返回 True；否则返回 False。
 """
 def is_point_in_polygon(detect_result, point_index):
+    # 将17 向下移动一些距离，方便判断小拇指弯曲
+    # detect_result[17].y = detect_result[17].y + 0.1
 
     # 多边形顶点索引
     polygon_indices = [0, 1, 2, 3, 6, 10, 14, 19, 18, 17, 0]
@@ -226,6 +231,8 @@ def is_point_in_polygon(detect_result, point_index):
 输出从大拇指到小指顺序排列的01列表，1代表伸直
 """
 def is_finger_bend(detection_result):
+    # detection_result_copy = detection_result
+
     # 各个手指顶点
     point_list = [4, 8, 12, 16, 20]
     # 弯曲伸直状态

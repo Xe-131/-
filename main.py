@@ -3,31 +3,31 @@ import queue
 import cv2
 import time
 from vision import vision_task
-from fly import fly_init
+from fly import fly_task
+from util import FlyCommand 
 
-def voice_task(lock):
-    while 1:
-        with lock:
-            print("voice task")
-
+def voice_task(command_queue):
+    while True:
+        command_queue.put(FlyCommand.MOVE_RIGHT) 
         time.sleep(2) 
 
-# vision 与 voice 调用飞行函数
-lock = threading.Lock()
 
 if __name__ == "__main__":
 
     frame_queue = queue.Queue(maxsize=0)
+    command_queue = queue.Queue(maxsize=0)
 
-    fly_init()
-
-    vision_thread = threading.Thread(target=vision_task, args=(lock, frame_queue))
-    voice_thread = threading.Thread(target=voice_task, args=(lock, ))
+    vision_thread = threading.Thread(target=vision_task, args=(frame_queue, command_queue))
+    voice_thread = threading.Thread(target=voice_task, args=(command_queue, ))
+    fly_thread = threading.Thread(target=fly_task, args=(command_queue, ))
 
     # 跟随主线程关闭
     vision_thread.daemon = True
     voice_thread.daemon = True
+    fly_thread.daemon = True
 
+    fly_thread.start()
+    time.sleep(0.5)
     vision_thread.start()
     voice_thread.start()
 
@@ -41,4 +41,5 @@ if __name__ == "__main__":
 
     vision_thread.join()
     voice_thread.join()
+    fly_thread.join()
 

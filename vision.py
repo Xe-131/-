@@ -13,10 +13,9 @@ from util import get_command
 from util import img_width  
 from util import img_height 
 from util import FlyCommand
-from fly import fly_execute
 
 
-def vision_task(lock, frame_queue):
+def vision_task(frame_queue, command_queue):
     # 初始化相机
     picam2 = Picamera2()
     picam2.configure(picam2.create_preview_configuration(main={"format": 'RGB888', "size": (img_width, img_height)}, transform=Transform(vflip=True)))
@@ -100,8 +99,7 @@ def vision_task(lock, frame_queue):
     
         # 连续frame_num 次相同的命令
         if len(set(command_history)) == 1:
-            with lock: 
-                fly_execute(command)
+            command_queue.put(command, block=True)
 
             # 打断连续
             command_history[-1] = None
