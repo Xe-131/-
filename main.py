@@ -3,13 +3,9 @@ import queue
 import cv2
 import time
 from vision import vision_task
+from voice import voice_task
 from fly import fly_task
 from util import FlyCommand 
-
-def voice_task(command_queue):
-    while True:
-        command_queue.put(FlyCommand.MOVE_RIGHT) 
-        time.sleep(2) 
 
 
 if __name__ == "__main__":

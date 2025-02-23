@@ -72,9 +72,16 @@ def vision_task(frame_queue, command_queue):
     
             # 单手
             if len(detection_result.hand_landmarks) == 1: 
+                # # 将17 号点向下移动，以便于识别小拇指的弯曲
+                # detection_result.hand_landmarks[0][17].y = detection_result.hand_landmarks[0][17].y + 0.05
+
                 command = FlyCommand.NONE
             # 双手
             else:
+                # 将17 号点向下移动，以便于识别小拇指的弯曲
+                # detection_result.hand_landmarks[0][17].y = detection_result.hand_landmarks[0][17].y + 0.05
+                # detection_result.hand_landmarks[1][17].y = detection_result.hand_landmarks[0][17].y + 0.05
+
                 # 判断双手手势
                 finger_state_0 = is_finger_bend(detection_result.hand_landmarks[0])
                 finger_state_1 = is_finger_bend(detection_result.hand_landmarks[1])
