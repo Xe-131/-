@@ -1,6 +1,9 @@
 import time
 import serial
 from util import FlyCommand
+from threading import Event
+
+voice_event = Event()
 
 def get_command(receive):
     category = receive[0]
@@ -35,15 +38,36 @@ def get_command(receive):
     return command
 
 def voice_task(command_queue):
+    print("\n初始化voice_task...")
+
     # uart4 
-    ser = serial.Serial("/dev/ttyAMA3", 115200)
+    try:
+        ser = serial.Serial("/dev/ttyAMA3", 115200)
+        if ser.isOpen():
+            ser.reset_input_buffer()
+
+            print("voice_task 初始化完毕\n")
+            voice_event.set()
+        else:
+            print("voice_task 初始化失败: 打开uart4 失败")
+    except BaseException as e:
+        print("voice_task 初始化失败: /dev/ttyAMA3 未找到")
     
+    voice_event.wait()
     while True:
         count = ser.inWaiting()
-
-        if count != 0:
+        if count != 2:
+            ser.reset_input_buffer()
+            # print(count)
+            # time.sleep(1)
+        else:
+            print(f"count == {count}")
             receive = ser.read(count)
             command = get_command(receive)
-            command_queue.put(command, block=True)
+            if command != FlyCommand.NONE:
+                command_queue.put(command, block=True)
+                print(receive)
+            
+        time.sleep(0.1)
 
 

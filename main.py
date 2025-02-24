@@ -3,10 +3,12 @@ import queue
 import cv2
 import time
 from vision import vision_task
+from vision import vision_event
 from voice import voice_task
+from voice import voice_event
 from fly import fly_task
+from fly import fly_event
 from util import FlyCommand 
-
 
 if __name__ == "__main__":
 
@@ -22,10 +24,14 @@ if __name__ == "__main__":
     voice_thread.daemon = True
     fly_thread.daemon = True
 
-    fly_thread.start()
-    time.sleep(0.5)
     vision_thread.start()
+    vision_event.wait()
+
     voice_thread.start()
+    voice_event.wait()
+
+    fly_thread.start()
+    fly_event.wait()
 
     # 主线程中显示图片
     while True:

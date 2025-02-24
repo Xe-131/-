@@ -1,4 +1,5 @@
 import cv2
+import math 
 from picamera2 import Picamera2
 from libcamera import Transform
 import time
@@ -14,8 +15,33 @@ from util import img_width
 from util import img_height 
 from util import FlyCommand
 
+from threading import Event
+
+vision_event = Event()
+set_done = False
+
+def move_point17(hand_landmarks):
+    # 步骤 1: 计算 point13 到 point17 的向量
+    dx = hand_landmarks[17].x - hand_landmarks[13].x
+    dy = hand_landmarks[17].y - hand_landmarks[13].y
+    
+    # 步骤 2: 计算单位向量
+    distance = math.sqrt(dx**2 + dy**2)  # 计算两点之间的距离
+    unit_dx = dx / distance  # x 分量的单位向量
+    unit_dy = dy / distance  # y 分量的单位向量
+    
+    # 步骤 3: 延长线段的 0.7 倍
+    extension_factor = 0.7
+    new_dx = unit_dx * extension_factor * distance
+    new_dy = unit_dy * extension_factor * distance
+    
+    # 步骤 4: 计算新的 point17 坐标
+    hand_landmarks[17].x = hand_landmarks[17].x + new_dx
+    hand_landmarks[17].y = hand_landmarks[17].y + new_dy
 
 def vision_task(frame_queue, command_queue):
+    print("\n初始化vision_task...")
+
     # 初始化相机
     picam2 = Picamera2()
     picam2.configure(picam2.create_preview_configuration(main={"format": 'RGB888', "size": (img_width, img_height)}, transform=Transform(vflip=True)))
@@ -41,6 +67,7 @@ def vision_task(frame_queue, command_queue):
     frame_num = 10
     command_history = list(range(frame_num))
 
+    
     while True:
         # 捕获一帧图像(BGR)
         img_BGR = picam2.capture_array()
@@ -72,15 +99,15 @@ def vision_task(frame_queue, command_queue):
     
             # 单手
             if len(detection_result.hand_landmarks) == 1: 
-                # # 将17 号点向下移动，以便于识别小拇指的弯曲
-                # detection_result.hand_landmarks[0][17].y = detection_result.hand_landmarks[0][17].y + 0.05
+                # 调整17 位置，方便识别小拇指的弯曲
+                move_point17(detection_result.hand_landmarks[0])
 
                 command = FlyCommand.NONE
             # 双手
             else:
-                # 将17 号点向下移动，以便于识别小拇指的弯曲
-                # detection_result.hand_landmarks[0][17].y = detection_result.hand_landmarks[0][17].y + 0.05
-                # detection_result.hand_landmarks[1][17].y = detection_result.hand_landmarks[0][17].y + 0.05
+                # 调整17 位置，方便识别小拇指的弯曲
+                move_point17(detection_result.hand_landmarks[0])
+                move_point17(detection_result.hand_landmarks[1])
 
                 # 判断双手手势
                 finger_state_0 = is_finger_bend(detection_result.hand_landmarks[0])
@@ -105,10 +132,18 @@ def vision_task(frame_queue, command_queue):
         command_history.append(command)
     
         # 连续frame_num 次相同的命令
+        global set_done
         if len(set(command_history)) == 1:
-            command_queue.put(command, block=True)
+            if not set_done:
+                # 初始化完毕
+                vision_event.set()
+                set_done = True
+                print("vision_task 初始化完毕\n")
+            else:
+                if command != FlyCommand.NONE:
+                    command_queue.put(command, block=True)
 
-            # 打断连续
-            command_history[-1] = None
+                # 打断连续
+                command_history[-1] = None
 
 

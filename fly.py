@@ -12,6 +12,7 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.positioning.motion_commander import MotionCommander
 from cflib.utils import uri_helper
 
+fly_event = Event()
 
 URI = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E7E7')
 
@@ -49,6 +50,8 @@ def fly(scf, commond_queue):
         
 
 def fly_task(commond_queue):
+    print("\n初始化fly_task...")
+
     try:
         # deck_attached_event = Event()
         
@@ -62,7 +65,12 @@ def fly_task(commond_queue):
             time.sleep(1)
             
             # 判断flow 甲板是否连接
-            
+           
+            # 清空命令队列
+            commond_queue.queue.clear()
+            print("\nfly_task 初始化完毕\n")
+            fly_event.set()
+
             # 在降落的状态下等待起飞命令
             while True:
                 commond = commond_queue.get(block=True)
@@ -74,6 +82,12 @@ def fly_task(commond_queue):
 
     # 未连接无人机时自动测试
     except BaseException as e:
+        print("未连接无人机\n")
+
+        # 清空命令队列
+        commond_queue.queue.clear()
+        fly_event.set()
+
         while True:
             command = commond_queue.get(block=True) 
             print(command)
