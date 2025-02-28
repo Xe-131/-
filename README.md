@@ -7,6 +7,8 @@
 * Crazyflies PA
 * SU-03T
 
+#### 注意：除了requirements.txt 中的依赖，还需要libcamera, 尽量选择高版本
+
 ### 手势部分
 采用Google 的Mediapipe 对双手的关键点进行预测，得到关键点坐标后，再根据手势规则（根据手势的几何特性如角度，距离等设计的判断规则）得到具体的飞行指令。
 

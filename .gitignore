@@ -7,7 +7,7 @@ Crazyflies_env/
 
 # cache
 code/cache/
-code/cache/__pycache__/
+code/__pycache__/
 
 
 
