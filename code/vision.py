@@ -53,7 +53,7 @@ def vision_task(frame_queue, command_queue):
     fps = 0
      
     # 配置模型
-    base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
+    base_options = python.BaseOptions(model_asset_path='../model/hand_landmarker.task')
     options = vision.HandLandmarkerOptions(base_options=base_options, 
                                            # running_mode="IMAGE",
                                            num_hands=2,

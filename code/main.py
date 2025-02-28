@@ -32,7 +32,8 @@ if __name__ == "__main__":
 
     fly_thread.start()
     fly_event.wait()
-
+    
+    print("------press 'q' to quit------")
     # 主线程中显示图片
     while True:
         frame = frame_queue.get(block=True) 

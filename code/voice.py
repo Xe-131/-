@@ -63,10 +63,10 @@ def voice_task(command_queue):
         else:
             print(f"count == {count}")
             receive = ser.read(count)
+            # print(receive)
             command = get_command(receive)
             if command != FlyCommand.NONE:
                 command_queue.put(command, block=True)
-                print(receive)
             
         time.sleep(0.1)
 

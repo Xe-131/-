@@ -5,3 +5,9 @@ crazyflie-lib-python/
 # 虚拟环境
 Crazyflies_env/
 
+# cache
+code/cache/
+code/cache/__pycache__/
+
+
+
